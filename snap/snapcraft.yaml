@@ -26,21 +26,34 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 parts:
   stp:
     plugin: cmake
+    cmake-parameters:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DENABLE_ASSERTIONS=OFF
+      - -DSTATICCOMPILE=ON
     source-type: git
     source: https://github.com/stp/stp
     build-packages:
       - bison
       - flex
-      - libboost-all-dev
-      - python
+      - python-is-python3
+      - python3
+      - python3-pip
       - perl
       - minisat
+      - libcryptominisat5-dev
+    override-pull: |
+      craftctl default
+      patch -p1 < $SNAPCRAFT_PROJECT_DIR/patches/stp.patch.diff
+
   klee:
     after:
       - stp
     plugin: cmake
     source-type: tar
     source: https://github.com/klee/klee/archive/refs/tags/$SNAPCRAFT_PROJECT_VERSION.tar.gz
+    override-build: |
+      pip3 install lit wllvm
+      craftctl default
     build-packages:
       - g++-multilib
       - gcc-multilib
@@ -54,3 +67,12 @@ parts:
       - llvm-13-dev
       - llvm-13-tools
       - libz3-dev # libz3-4
+    stage-packages:
+      - llvm-13
+      - libz3-4
+
+apps:
+  klee:
+      command: usr/bin/klee
+      plugs: [home]
+

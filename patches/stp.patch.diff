@@ -1,0 +1,470 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0a56a14d..dcd6959e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,7 +43,7 @@ endif()
+ project(STP)
+ 
+ set(CMAKE_C_STANDARD 99)
+-set(CMAKE_CXX_STANDARD 14)
++set(CMAKE_CXX_STANDARD 17)
+ 
+ include(GenerateExportHeader)
+ include(GNUInstallDirs)
+@@ -323,8 +323,6 @@ macro(add_cxx_flag_if_supported flagname)
+   endif()
+ endmacro()
+ 
+-check_cxx_compiler_flag("-std=c++11" HAVE_FLAG_STD_CPP11)
+-
+ if(APPLE)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+ endif()
+@@ -478,7 +476,8 @@ option(NOCRYPTOMINISAT "Don't try to use cryptominisat" OFF)
+ 
+ if (NOT NOCRYPTOMINISAT)
+   set(cryptominisat5_DIR "" CACHE PATH "Path to directory containing cryptominisat5Config.cmake")
+-  find_package(cryptominisat5 CONFIG)
++  find_package(cryptominisat5 CONFIG)  
++  check_cxx_compiler_flag("-std=c++11" HAVE_FLAG_STD_CPP11)
+   if (cryptominisat5_FOUND AND HAVE_FLAG_STD_CPP11 AND (NOT NOCRYPTOMINISAT))
+     message(STATUS "CryptoMiniSat5 dynamic lib: ${CRYPTOMINISAT5_LIBRARIES}")
+     message(STATUS "CryptoMiniSat5 static lib:  ${CRYPTOMINISAT5_STATIC_LIBRARIES}")
+diff --git a/include/stp/AST/MutableASTNode.h b/include/stp/AST/MutableASTNode.h
+index 3fe6fa18..631543f7 100644
+--- a/include/stp/AST/MutableASTNode.h
++++ b/include/stp/AST/MutableASTNode.h
+@@ -101,7 +101,7 @@ public:
+     for (ParentsType::iterator it = parents.begin(); it != parents.end(); it++)
+     {
+       vector<MutableASTNode*>::iterator it2 = (*it)->children.begin();
+-      bool found = false;
++      [[maybe_unused]] bool found = false;
+       for (; it2 != (*it)->children.end(); it2++)
+       {
+         assert(*it2 != NULL);
+diff --git a/include/stp/Simplifier/MergeSame.h b/include/stp/Simplifier/MergeSame.h
+index 558b0010..7eb725d8 100644
+--- a/include/stp/Simplifier/MergeSame.h
++++ b/include/stp/Simplifier/MergeSame.h
+@@ -156,7 +156,7 @@ public:
+                 && conjuncts[i0].Degree() == 2 
+                 && conjuncts[i0][0] == not0
+                 && conjuncts[i0][1] == not1
+-                && i0 != i
++                && i0 != (int)i
+                 && not0 != not1
+                 )
+               {
+diff --git a/include/stp/Simplifier/constantBitP/Dependencies.h b/include/stp/Simplifier/constantBitP/Dependencies.h
+index 74d80c94..be822620 100644
+--- a/include/stp/Simplifier/constantBitP/Dependencies.h
++++ b/include/stp/Simplifier/constantBitP/Dependencies.h
+@@ -77,7 +77,7 @@ private:
+         return; // already been added in.
+     }
+ 
+-    for (const auto child: current)
++    for (const auto& child: current)
+     {
+       build(child, current);
+     }
+diff --git a/lib/AbsRefineCounterExample/ArrayTransformer.cpp b/lib/AbsRefineCounterExample/ArrayTransformer.cpp
+index e9e31a93..2e7ea22c 100644
+--- a/lib/AbsRefineCounterExample/ArrayTransformer.cpp
++++ b/lib/AbsRefineCounterExample/ArrayTransformer.cpp
+@@ -261,7 +261,7 @@ void ArrayTransformer::assertTransformPostConditions(const ASTNode& term,
+   if (!p.second)
+     return;
+ 
+-  const Kind k = term.GetKind();
++  [[maybe_unused]] const Kind k = term.GetKind();
+ 
+   // Check the array reads / writes have been removed
+   assert(READ != k);
+diff --git a/lib/NodeFactory/SimplifyingNodeFactory.cpp b/lib/NodeFactory/SimplifyingNodeFactory.cpp
+index 22580154..c5190986 100644
+--- a/lib/NodeFactory/SimplifyingNodeFactory.cpp
++++ b/lib/NodeFactory/SimplifyingNodeFactory.cpp
+@@ -1344,7 +1344,7 @@ ASTNode SimplifyingNodeFactory::plusRules(const ASTVec& oldChildren)
+ 
+ 
+ // If the shift is bigger than the bitwidth, replace by an extract.
+-ASTNode convertArithmeticKnownShiftAmount(const Kind k,
++ASTNode convertArithmeticKnownShiftAmount([[maybe_unused]]const Kind k,
+                                                       const ASTVec& children,
+                                                       STPMgr& bm,
+                                                       NodeFactory* nf)
+diff --git a/lib/Sat/CryptoMinisat5.cpp b/lib/Sat/CryptoMinisat5.cpp
+index 11564559..fa0b2ce3 100644
+--- a/lib/Sat/CryptoMinisat5.cpp
++++ b/lib/Sat/CryptoMinisat5.cpp
+@@ -23,6 +23,10 @@ THE SOFTWARE.
+ ********************************************************************/
+ 
+ #include "stp/Sat/CryptoMinisat5.h"
++#undef l_False
++#undef l_Undef
++#undef l_True
++#undef var_Undef
+ #include "cryptominisat5/cryptominisat.h"
+ #include <unordered_set>
+ #include <algorithm>
+@@ -150,11 +154,11 @@ void CryptoMiniSat5::solveAndDump()
+ // Count how many literals/bits get fixed subject to the assumptions..
+ uint32_t CryptoMiniSat5::getFixedCountWithAssumptions(const stp::SATSolver::vec_literals& assumps, const std::unordered_set<unsigned>& literals )
+ {
+-  const uint64_t conf = s->get_sum_conflicts();
++  [[maybe_unused]] const uint64_t conf = s->get_sum_conflicts();
+   assert(conf == 0);
+ 
+ 
+-  const CMSat::lbool r = s->simplify();  
++  [[maybe_unused]] const CMSat::lbool r = s->simplify();  
+ 
+    
+   // Add the assumptions are clauses.
+diff --git a/lib/Sat/MinisatCore.cpp b/lib/Sat/MinisatCore.cpp
+index d0c1216e..59a83666 100644
+--- a/lib/Sat/MinisatCore.cpp
++++ b/lib/Sat/MinisatCore.cpp
+@@ -78,7 +78,7 @@ bool MinisatCore::propagateWithAssumptions(
+   setMaxConflicts(0);
+   Minisat::lbool ret = s->solveLimited(assumps);
+   assert(s->conflicts ==0);
+-  return ret != (Minisat::lbool)Minisat::l_False;
++  return ret != (Minisat::lbool)l_False;
+ }
+ 
+ bool MinisatCore::solve(bool& timeout_expired) // Search without assumptions.
+@@ -88,12 +88,12 @@ bool MinisatCore::solve(bool& timeout_expired) // Search without assumptions.
+ 
+   Minisat::vec<Minisat::Lit> assumps;
+   Minisat::lbool ret = s->solveLimited(assumps);
+-  if (ret == (Minisat::lbool)Minisat::l_Undef)
++  if (ret == (Minisat::lbool)l_Undef)
+   {
+     timeout_expired = true;
+   }
+ 
+-  return ret == (Minisat::lbool)Minisat::l_True;
++  return ret == (Minisat::lbool)l_True;
+ }
+ 
+ uint8_t MinisatCore::modelValue(uint32_t x) const
+diff --git a/lib/Sat/SimplifyingMinisat.cpp b/lib/Sat/SimplifyingMinisat.cpp
+index 77dc5ec0..c0a25eb3 100644
+--- a/lib/Sat/SimplifyingMinisat.cpp
++++ b/lib/Sat/SimplifyingMinisat.cpp
+@@ -71,7 +71,7 @@ bool SimplifyingMinisat::solve(
+ 
+   Minisat::vec<Minisat::Lit> assumps;
+   Minisat::lbool ret = s->solveLimited(assumps);
+-  if (ret == (Minisat::lbool)Minisat::l_Undef)
++  if (ret == (Minisat::lbool)l_Undef)
+   {
+     timeout_expired = true;
+   }
+diff --git a/lib/Simplifier/NodeDomainAnalysis.cpp b/lib/Simplifier/NodeDomainAnalysis.cpp
+index 0eccd528..ef7eaa1b 100644
+--- a/lib/Simplifier/NodeDomainAnalysis.cpp
++++ b/lib/Simplifier/NodeDomainAnalysis.cpp
+@@ -102,7 +102,7 @@ namespace stp
+           
+           stp::CBV result = CONSTANTBV::BitVector_Create(width, true);
+           bool reduced = false;
+-          for (int i = width-1; i >=0 ; i--)
++          for (int i = width-1; i >= 0; i--)
+           {
+             const bool bit = CONSTANTBV::BitVector_bit_test(interval->maxV, i);
+             if (bits->isFixed(i))
+@@ -113,7 +113,7 @@ namespace stp
+                   if (!bit && !reduced)
+                   {
+                      // We are increasing the result. So we need to reduce above.
+-                    for (int j = i+1 ; j <= width-1 ; j++)         
++                    for (unsigned int j = i+1 ; j <= width-1 ; j++)         
+                     {
+                       if (bits->isFixed(j))   
+                         continue;
+diff --git a/lib/Simplifier/PropagateEqualities.cpp b/lib/Simplifier/PropagateEqualities.cpp
+index 62ac0f51..24a60d14 100644
+--- a/lib/Simplifier/PropagateEqualities.cpp
++++ b/lib/Simplifier/PropagateEqualities.cpp
+@@ -29,7 +29,7 @@ THE SOFTWARE.
+ namespace stp
+ {
+ 
+-void log(std::string s)
++void log([[maybe_unused]] std::string s)
+ {
+ #if 0
+   std::cerr << ">>" << s;
+@@ -527,7 +527,7 @@ void PropagateEqualities::buildCandidateList(const ASTNode& a)
+ 
+     if (!added && bm->UserFlags.stats_flag)
+     {
+-      const auto old = todo;
++      [[maybe_unused]] const auto old = todo;
+       countToDo(c[0]);
+       countToDo(c[1]);
+       //if (todo != old)
+diff --git a/lib/Simplifier/Rewriting.cpp b/lib/Simplifier/Rewriting.cpp
+index 614e3463..b6989e52 100644
+--- a/lib/Simplifier/Rewriting.cpp
++++ b/lib/Simplifier/Rewriting.cpp
+@@ -306,11 +306,11 @@ namespace stp
+        )
+        {
+ 
+-        for (int matching =0 ; matching < c[1][0].Degree(); matching++)
++        for (unsigned int matching =0 ; matching < c[1][0].Degree(); matching++)
+           if (c[1][0][matching] == c[0])
+           {
+             ASTVec others;
+-            for (int i =0 ; i < c[1][0].Degree(); i++)
++            for (unsigned int i =0 ; i < c[1][0].Degree(); i++)
+               if (i != matching)
+                 others.push_back(c[1][0][i]);
+ 
+diff --git a/lib/Simplifier/Simplifier.cpp b/lib/Simplifier/Simplifier.cpp
+index e1bfc5f2..34ba3988 100644
+--- a/lib/Simplifier/Simplifier.cpp
++++ b/lib/Simplifier/Simplifier.cpp
+@@ -295,7 +295,7 @@ ASTNodeMap Simplifier::FindConsts_TopLevel(const ASTNode& b, bool pushNeg,ASTNod
+ 
+   ASTNodeMap constants;
+   
+-  for (const auto e: *SimplifyMap)
++  for (const auto& e: *SimplifyMap)
+   {
+     if (e.second.isConstant())
+     {
+@@ -1701,7 +1701,7 @@ ASTNode Simplifier::pullUpBVSX(ASTNode output)
+   assert(output.GetChildren().size() == 2);
+   assert(output[0].GetKind() == BVSX);
+   assert(output[1].GetKind() == BVSX);
+-  const Kind k = output.GetKind();
++  [[maybe_unused]] const Kind k = output.GetKind();
+ 
+   assert(BVMULT == k || SBVDIV == k || BVPLUS == k);
+   const int inputValueWidth = output.GetValueWidth();
+diff --git a/lib/Simplifier/SplitExtracts.cpp b/lib/Simplifier/SplitExtracts.cpp
+index ceefe3d2..b3f02673 100644
+--- a/lib/Simplifier/SplitExtracts.cpp
++++ b/lib/Simplifier/SplitExtracts.cpp
+@@ -85,7 +85,7 @@ namespace stp
+ 
+       for (const auto& e: nodeToExtracts )
+       {
+-        const auto& symbol = e.first;
++        [[maybe_unused]] const auto& symbol = e.first;
+         assert(symbol.GetKind() == SYMBOL);
+ 
+         auto ranges = e.second;
+diff --git a/lib/Simplifier/UnsignedIntervalAnalysis.cpp b/lib/Simplifier/UnsignedIntervalAnalysis.cpp
+index 32734447..808eb8e7 100644
+--- a/lib/Simplifier/UnsignedIntervalAnalysis.cpp
++++ b/lib/Simplifier/UnsignedIntervalAnalysis.cpp
+@@ -273,7 +273,7 @@ namespace stp
+         CBV remainder = CONSTANTBV::BitVector_Create(width, true);
+ 
+         CBV tmp0 = CONSTANTBV::BitVector_Clone(top->minV);
+-        CONSTANTBV::ErrCode e = CONSTANTBV::BitVector_Div_Pos(
++        [[maybe_unused]] CONSTANTBV::ErrCode e = CONSTANTBV::BitVector_Div_Pos(
+             result->minV, tmp0, c1->maxV, remainder);
+         assert(0 == e);
+         CONSTANTBV::BitVector_Destroy(tmp0);
+@@ -451,7 +451,7 @@ namespace stp
+               bad = true;
+               break;
+             }
+-            CONSTANTBV::ErrCode e = CONSTANTBV::BitVector_Multiply(
++            [[maybe_unused]] CONSTANTBV::ErrCode e = CONSTANTBV::BitVector_Multiply(
+                 min, result->minV, children[i]->minV);
+             assert(0 == e);
+ 
+diff --git a/lib/Simplifier/constantBitP/ConstantBitP_Boolean.cpp b/lib/Simplifier/constantBitP/ConstantBitP_Boolean.cpp
+index b781ef7a..23c93bf5 100644
+--- a/lib/Simplifier/constantBitP/ConstantBitP_Boolean.cpp
++++ b/lib/Simplifier/constantBitP/ConstantBitP_Boolean.cpp
+@@ -227,7 +227,7 @@ Result bvImpliesBothWays(vector<FixedBits*>& children, FixedBits& result)
+   FixedBits& b = (*children[1]);
+ 
+   assert(a.getWidth() == result.getWidth());
+-  const int bitWidth = a.getWidth();
++  [[maybe_unused]] const int bitWidth = a.getWidth();
+   assert(bitWidth == 1);
+ 
+   Result r = NO_CHANGE;
+diff --git a/lib/Simplifier/constantBitP/ConstantBitP_Multiplication.cpp b/lib/Simplifier/constantBitP/ConstantBitP_Multiplication.cpp
+index 1ff764e9..10f8cb48 100644
+--- a/lib/Simplifier/constantBitP/ConstantBitP_Multiplication.cpp
++++ b/lib/Simplifier/constantBitP/ConstantBitP_Multiplication.cpp
+@@ -82,7 +82,7 @@ Result fixIfCanForMultiplication(vector<FixedBits*>& children,
+   Result result = NO_CHANGE;
+ 
+   // only one of the conditionals can run.
+-  bool run = false;
++  [[maybe_unused]] bool run = false;
+ 
+   // We need every value that is unfixed to be set to one.
+   if (aspirationalSum == columnOnes + columnOneFixed + columnUnfixed &&
+@@ -263,7 +263,7 @@ Result useLeadingZeroesToFix(FixedBits& x, FixedBits& y, FixedBits& output)
+   }
+ 
+   stp::CBV result = CONSTANTBV::BitVector_Create(2 * bitWidth + 1, true);
+-  CONSTANTBV::ErrCode ec = CONSTANTBV::BitVector_Multiply(result, x_c, y_c);
++  [[maybe_unused]] CONSTANTBV::ErrCode ec = CONSTANTBV::BitVector_Multiply(result, x_c, y_c);
+   assert(ec == CONSTANTBV::ErrCode_Ok);
+ 
+   for (int j = (2 * bitWidth) - 1; j >= 0; j--)
+@@ -569,7 +569,7 @@ void printColumns(signed* sumL, signed* sumH, int bitWidth)
+ }
+ 
+ Result bvMultiplyBothWays(vector<FixedBits*>& children, FixedBits& output,
+-                          stp::STPMgr* bm, MultiplicationStats* ms)
++                          [[maybe_unused]] stp::STPMgr* bm, MultiplicationStats* ms)
+ {
+   FixedBits& x = *children[0];
+   FixedBits& y = *children[1];
+diff --git a/lib/Simplifier/constantBitP/ConstantBitP_Shifting.cpp b/lib/Simplifier/constantBitP/ConstantBitP_Shifting.cpp
+index 0a630f6e..2f11d838 100644
+--- a/lib/Simplifier/constantBitP/ConstantBitP_Shifting.cpp
++++ b/lib/Simplifier/constantBitP/ConstantBitP_Shifting.cpp
+@@ -162,7 +162,7 @@ FixedBits getPossible(unsigned bitWidth, bool possibleShift[],
+     args.push_back(&bitWidthFB);
+ 
+     // Write into working anything that can be determined given it's >=bitWidth.
+-    Result r = bvGreaterThanEqualsBothWays(args, output);
++    [[maybe_unused]] Result r = bvGreaterThanEqualsBothWays(args, output);
+     assert(CONFLICT != r);
+ 
+     // Get the union of "working" with the prior union.
+@@ -757,7 +757,7 @@ Result bvLeftShiftBothWays(vector<FixedBits*>& children, FixedBits& output)
+     args.push_back(&bitWidthFB);
+ 
+     // Write into working anything that can be determined given it's >=bitWidth.
+-    Result r = bvGreaterThanEqualsBothWays(args, output);
++    [[maybe_unused]] Result r = bvGreaterThanEqualsBothWays(args, output);
+     assert(CONFLICT != r);
+ 
+     // Get the union of "working" with the prior union.
+diff --git a/lib/Simplifier/constantBitP/ConstantBitP_TransferFunctions.cpp b/lib/Simplifier/constantBitP/ConstantBitP_TransferFunctions.cpp
+index 6ade45ca..8cc3ad89 100644
+--- a/lib/Simplifier/constantBitP/ConstantBitP_TransferFunctions.cpp
++++ b/lib/Simplifier/constantBitP/ConstantBitP_TransferFunctions.cpp
+@@ -258,14 +258,14 @@ Result bvSignExtendBothWays(vector<FixedBits*>& children, FixedBits& output)
+ 
+ Result bvExtractBothWays(vector<FixedBits*>& children, FixedBits& output)
+ {
+-  const size_t numberOfChildren = children.size();
++  [[maybe_unused]] const size_t numberOfChildren = children.size();
+   const unsigned outputBitWidth = output.getWidth();
+ 
+   Result result = NO_CHANGE;
+ 
+   assert(3 == numberOfChildren);
+ 
+-  unsigned top = children[1]->getUnsignedValue();
++  [[maybe_unused]] unsigned top = children[1]->getUnsignedValue();
+   unsigned bottom = children[2]->getUnsignedValue();
+ 
+   FixedBits& input = *(children[0]);
+diff --git a/lib/Simplifier/constantBitP/ConstantBitPropagation.cpp b/lib/Simplifier/constantBitP/ConstantBitPropagation.cpp
+index d739d252..ffead831 100644
+--- a/lib/Simplifier/constantBitP/ConstantBitPropagation.cpp
++++ b/lib/Simplifier/constantBitP/ConstantBitPropagation.cpp
+@@ -332,7 +332,7 @@ ASTNode ConstantBitPropagation::topLevelBothWays(const ASTNode& top,
+       {
+         if (SYMBOL == node.GetKind())
+         {
+-          bool r = simplifier->UpdateSubstitutionMap(node, constNode);
++          [[maybe_unused]] bool r = simplifier->UpdateSubstitutionMap(node, constNode);
+           assert(r);
+           doAssign = false;
+         }
+@@ -354,7 +354,7 @@ ASTNode ConstantBitPropagation::topLevelBothWays(const ASTNode& top,
+         assert(((unsigned)bits.getWidth()) == node.GetValueWidth());
+         if (SYMBOL == node.GetKind())
+         {
+-          bool r = simplifier->UpdateSubstitutionMap(node, constNode);
++          [[maybe_unused]] bool r = simplifier->UpdateSubstitutionMap(node, constNode);
+           assert(r);
+           doAssign = false;
+         }
+@@ -428,7 +428,7 @@ void notHandled(const Kind& k)
+ // add to the work list any nodes that take the result of the "n" node.
+ void ConstantBitPropagation::scheduleUp(const ASTNode& n)
+ {
+-  for (const auto it : *dependents->getDependents(n))
++  for (const auto& it : *dependents->getDependents(n))
+     workList->push(it);
+ }
+ 
+diff --git a/lib/Simplifier/consteval.cpp b/lib/Simplifier/consteval.cpp
+index 45589cf5..1ebb5a58 100644
+--- a/lib/Simplifier/consteval.cpp
++++ b/lib/Simplifier/consteval.cpp
+@@ -438,7 +438,7 @@ ASTNode NonMemberBVConstEvaluator(STPMgr* _bm, const Kind k,
+           CBV tmp0b = CONSTANTBV::BitVector_Create(inputwidth, true);
+           CONSTANTBV::BitVector_Negate(tmp0b, tmp0);
+ 
+-          CONSTANTBV::ErrCode e =
++          [[maybe_unused]] CONSTANTBV::ErrCode e =
+               CONSTANTBV::BitVector_Div_Pos(quotient, tmp0b, tmp1, remainder);
+           assert(e == CONSTANTBV::ErrCode_Ok);
+ 
+@@ -467,7 +467,7 @@ ASTNode NonMemberBVConstEvaluator(STPMgr* _bm, const Kind k,
+           CBV tmp1b = CONSTANTBV::BitVector_Create(inputwidth, true);
+           CONSTANTBV::BitVector_Negate(tmp1b, tmp1);
+ 
+-          CONSTANTBV::ErrCode e =
++          [[maybe_unused]] CONSTANTBV::ErrCode e =
+               CONSTANTBV::BitVector_Div_Pos(quotient, tmp0, tmp1b, remainder);
+ 
+           assert(e == CONSTANTBV::ErrCode_Ok);
+@@ -495,7 +495,7 @@ ASTNode NonMemberBVConstEvaluator(STPMgr* _bm, const Kind k,
+           CONSTANTBV::BitVector_Negate(tmp0b, tmp0);
+           CONSTANTBV::BitVector_Negate(tmp1b, tmp1);
+ 
+-          CONSTANTBV::ErrCode e =
++          [[maybe_unused]] CONSTANTBV::ErrCode e =
+               CONSTANTBV::BitVector_Div_Pos(quotient, tmp0b, tmp1b, remainder);
+           assert(e == CONSTANTBV::ErrCode_Ok);
+ 
+@@ -547,7 +547,7 @@ ASTNode NonMemberBVConstEvaluator(STPMgr* _bm, const Kind k,
+         // the same as the copy belonging to an ASTNode input_children[0] this
+         // must be copied.
+         tmp0 = CONSTANTBV::BitVector_Clone(tmp0);
+-        CONSTANTBV::ErrCode e =
++        [[maybe_unused]] CONSTANTBV::ErrCode e =
+             CONSTANTBV::BitVector_Div_Pos(quotient, tmp0, tmp1, remainder);
+         CONSTANTBV::BitVector_Destroy(tmp0);
+ 
+diff --git a/lib/ToSat/BitBlaster.cpp b/lib/ToSat/BitBlaster.cpp
+index 2d9c80eb..d78d5dfb 100644
+--- a/lib/ToSat/BitBlaster.cpp
++++ b/lib/ToSat/BitBlaster.cpp
+@@ -2254,7 +2254,7 @@ BBNodeVec BitBlaster<BBNode, BBNodeManagerT>::v9(vector<list<BBNode>>& products,
+     vector<BBNode> sorted; // The current column (sorted) gets put into here.
+     vector<BBNode> prior;  // Prior is always empty in this..
+ 
+-    const unsigned size = products[column].size();
++    [[maybe_unused]] const unsigned size = products[column].size();
+     sortingNetworkAdd(support, products[column], sorted, prior);
+ 
+     assert(products[column].size() == 1);
+diff --git a/lib/extlib-abc/aig/aig/aigUtil.c b/lib/extlib-abc/aig/aig/aigUtil.c
+index 593eaaf7..47ff8d39 100644
+--- a/lib/extlib-abc/aig/aig/aigUtil.c
++++ b/lib/extlib-abc/aig/aig/aigUtil.c
+@@ -658,7 +658,7 @@ void Aig_ManPrintVerbose( Aig_Man_t * p, int fHaig )
+ void Aig_ManDump( Aig_Man_t * p )
+ { 
+     static THREAD_LOCAL int Counter = 0;
+-    char FileName[20];
++    char FileName[24];
+     // dump the logic into a file
+     sprintf( FileName, "aigbug\\%03d.blif", ++Counter );
+     Aig_ManDumpBlif( p, FileName );
