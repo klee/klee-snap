@@ -1,16 +1,56 @@
-name: my-snap-name # you probably want to 'snapcraft register <name>'
-version: '0.1' # just for humans, typically '1.2+git' or '1.3.2'
-summary: Single-line elevator pitch for your amazing snap # 79 char long summary
+name: klee
+version: 'v3.0' # just for humans, typically '1.2+git' or '1.3.2'
+summary:  KLEE Symbolic Execution Engine 
 description: |
-  This is my-snap's description. You have a paragraph or two to tell the
-  most important story about your snap. Keep it under 100 words though,
-  we live in tweetspace and your description wants to look good in the snap
-  store.
+  KLEE is a symbolic virtual machine built on top of the LLVM compiler 
+  infrastructure. Currently, there are two primary components:
+
+  - The core symbolic virtual machine engine; this is responsible for
+    executing LLVM bitcode modules with support for symbolic values.
+  - A POSIX/Linux emulation layer oriented towards supporting uClibc,
+    with additional support for making parts of the operating system
+    environment symbolic.
+
+  Additionally, there is a simple library for replaying computed inputs
+  on native code (for closed programs). There is also a more complicated
+  infrastructure for replaying the inputs generated for the POSIX/Linux 
+  emulation layer, which handles running native programs in an environment
+  that matches a computed test input, including setting up files, pipes,
+  environment variables, and passing command line arguments.
+
+  For further information, see [klee hompage](http://klee.github.io).
 
 base: core22
 confinement: devmode # use 'strict' once you have the right plugs and slots
 
 parts:
-  my-part:
-    # See 'snapcraft plugins'
-    plugin: nil
+  stp:
+    plugin: cmake
+    source-type: git
+    source: https://github.com/stp/stp
+    build-packages:
+      - bison
+      - flex
+      - libboost-all-dev
+      - python
+      - perl
+      - minisat
+  klee:
+    after:
+      - stp
+    plugin: cmake
+    source-type: tar
+    source: https://github.com/klee/klee/archive/refs/tags/$SNAPCRAFT_PROJECT_VERSION.tar.gz
+    build-packages:
+      - g++-multilib
+      - gcc-multilib
+      - libcap-dev
+      - libgoogle-perftools-dev
+      - libncurses5-dev
+      - libsqlite3-dev
+      - libtcmalloc-minimal4
+      - clang-13
+      - llvm-13
+      - llvm-13-dev
+      - llvm-13-tools
+      - libz3-dev # libz3-4
