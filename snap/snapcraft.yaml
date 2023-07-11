@@ -42,6 +42,10 @@ parts:
       - minisat
       - libcryptominisat5-dev
       - zlib1g-dev
+    prime:
+      - -usr/local/bin
+      - -usr/local/include
+      - -usr/share
     override-pull: |
       craftctl default
       patch -p1 < $SNAPCRAFT_PROJECT_DIR/patches/stp.patch.diff
@@ -68,10 +72,13 @@ parts:
       - llvm-13-tools
       - libz3-dev # libz3-4
     stage-packages:
-      - llvm-13
+      - libllvm13
       - libz3-4
       - libgoogle-perftools4
       - libunwind8
+      - libsqlite3-0
+    prime:
+      - -usr/share
   scripts:
     source: scripts
     source-type: local
