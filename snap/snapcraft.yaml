@@ -72,11 +72,25 @@ parts:
       - libz3-4
       - libgoogle-perftools4
       - libunwind8
+  scripts:
+    source: scripts
+    source-type: local
+    plugin: nil
+    override-build: |
+      mkdir -p "${SNAPCRAFT_PART_INSTALL}/usr/local/bin/"
+      cp --archive --link --no-dereference --update . "${SNAPCRAFT_PART_INSTALL}/usr/local/bin/"
+
 apps:
   klee:
     command: usr/local/bin/klee
     plugs: [home]
   ktest-tool:
     command: usr/local/bin/ktest-tool
+    plugs: [home]
+  env:
+    command: usr/local/bin/env.sh
+    completer: usr/local/bin/env.comp.sh
+  run:
+    command: usr/local/bin/run.sh
     plugs: [home]
 
