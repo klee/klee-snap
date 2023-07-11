@@ -41,6 +41,7 @@ parts:
       - perl
       - minisat
       - libcryptominisat5-dev
+      - zlib1g-dev
     override-pull: |
       craftctl default
       patch -p1 < $SNAPCRAFT_PROJECT_DIR/patches/stp.patch.diff
@@ -61,7 +62,6 @@ parts:
       - libgoogle-perftools-dev
       - libncurses5-dev
       - libsqlite3-dev
-      - libtcmalloc-minimal4
       - clang-13
       - llvm-13
       - llvm-13-dev
@@ -70,9 +70,13 @@ parts:
     stage-packages:
       - llvm-13
       - libz3-4
-
+      - libgoogle-perftools4
+      - libunwind8
 apps:
   klee:
-      command: usr/bin/klee
-      plugs: [home]
+    command: usr/local/bin/klee
+    plugs: [home]
+  ktest-tool:
+    command: usr/local/bin/ktest-tool
+    plugs: [home]
 
