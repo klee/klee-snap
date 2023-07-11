@@ -21,7 +21,7 @@ description: |
   For further information, see [klee hompage](http://klee.github.io).
 
 base: core22
-confinement: devmode # use 'strict' once you have the right plugs and slots
+confinement: strict 
 
 parts:
   stp:
@@ -86,6 +86,24 @@ apps:
     plugs: [home]
   ktest-tool:
     command: usr/local/bin/ktest-tool
+    plugs: [home]
+  kleaver:
+    command: usr/local/bin/kleaver
+    plugs: [home]
+  replay:
+    command: usr/local/bin/klee-replay
+    plugs: [home]
+  stats:
+    command: usr/local/bin/klee-stats
+    plugs: [home]
+  zesti:
+    command: usr/local/bin/klee-zesti
+    plugs: [home]
+  ktest-gen:
+    command: usr/local/bin/ktest-gen
+    plugs: [home]
+  ktest-randgen:
+    command: usr/local/bin/ktest-randgen
     plugs: [home]
   env:
     command: usr/local/bin/env.sh
