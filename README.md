@@ -28,6 +28,41 @@ distributions.</p>
 
     sudo snap install klee
 
+All klee commands can be used with the `klee.` prefix (e.g. `klee.ktest-gen`). Commands that contained the `klee-<command>` prefix were simply renamed to `klee.<command>` (e.g. `klee-zesti` becomes `klee.zesti`).
+
+This snap also includes two convenience scripts:
+
+ - `klee.run <testcase> <command...>` which can be used to run a testcase. It will setup all the necessary variables for you.
+ - `klee.env [CFLAGS|LDFLAGS]` which outputs the flags needed to build or link a program against klee.
+
+An example of its usage, following the [first tutorial](http://klee.github.io/tutorials/testing-function/) could be:
+
+```
+$ clang $(klee.env CFLAGS) -emit-llvm -c -g -O0 -Xclang -disable-O0-optnone get_sign.c
+$ klee get_sign.bc
+KLEE: output directory = "klee-out-0"
+
+KLEE: done: total instructions = 33
+KLEE: done: completed paths = 3
+KLEE: done: partially completed paths = 0
+KLEE: done: generated tests = 3
+$ klee.ktest-tool klee-last/test000001.ktest
+ktest file : 'klee-last/test000001.ktest'
+args       : ['get_sign.bc']
+num objects: 1
+object 0: name: 'a'
+object 0: size: 4
+object 0: data: b'\x00\x00\x00\x00'
+object 0: hex : 0x00000000
+object 0: int : 0
+object 0: uint: 0
+object 0: text: ....
+$ gcc $(klee.env CFLAGS) $(klee.env LDFLAGS) get_sign.c
+$ klee.run klee-last/test000001.ktest ./a.out
+$ echo $?
+0
+```
+
 <!-- Uncomment and modify this when your snap is available on the store
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/my-snap-name)
 -->
@@ -46,11 +81,11 @@ Snapcrafters ([join us](https://forum.snapcraft.io/t/snapcrafters-reboot/24625))
   - [x] Convert the snap to `strict` confinement, or `classic` confinement if it qualifies
   - [x] Register the snap in the store, **using the preferred upstream name**
   - [ ] Add a screenshot to this `README.md`
-  - [ ] Add install instructions to this `README.md`
-  - [ ] Update snap store metadata, icons and screenshots
-  - [ ] Publish the confined snap in the Snap store beta channel
-  - [ ] Update the install instructions in this `README.md`
-  - [ ] Post a call for testing in the Snapcraft Forum ["Snapcrafters" category](https://forum.snapcraft.io/c/snapcrafters/23) - [link]()
+  - [x] Add install instructions to this `README.md`
+  - [x] Update snap store metadata, icons and screenshots
+  - [x] Publish the confined snap in the Snap store beta channel
+  - [x] Update the install instructions in this `README.md`
+  - [x] Post a call for testing in the Snapcraft Forum ["Snapcrafters" category](https://forum.snapcraft.io/c/snapcrafters/23) - [link](https://forum.snapcraft.io/t/call-for-testing-klee/35964)
   - [ ] Add the Snapcraft store account (snap-advocacy@canonical.com) as a collaborator to your snap in the [Dashboard](https://dashboard.snapcraft.io) and ask a [Snapcrafters admin](https://github.com/orgs/snapcrafters/people?query=%20role%3Aowner) to accept this request
   - [ ] Fix all important issues found during testing
   - [ ] Make a post in the Snapcraft Forum ["store-requests" category](https://forum.snapcraft.io/c/store-requests/19) asking for a transfer of the snap name from you to Snapcrafters - [link]()
