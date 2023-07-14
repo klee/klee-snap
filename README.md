@@ -7,16 +7,14 @@
 <p align="center"><b>This is the snap for KLEE</b>, <i>Symbolic Execution Engine</i>. It works on Ubuntu, Fedora, Debian, and other major Linux
 distributions.</p>
 
-<!-- Uncomment and modify this when you are provided a build status badge
 <p align="center">
 <a href="https://snapcraft.io/my-snap-name">
-  <img alt="enpass" src="https://snapcraft.io/my-snap-name/badge.svg" />
+  <img alt="enpass" src="https://snapcraft.io/klee/badge.svg" />
 </a>
 <a href="https://snapcraft.io/my-snap-name">
-  <img alt="enpass" src="https://snapcraft.io/my-snap-name/trending.svg?name=0" />
+  <img alt="enpass" src="https://snapcraft.io/klee/trending.svg?name=0" />
 </a>
 </p>
--->
 
 <!-- Uncomment and modify this when you have a screenshot
 ![KLEE](screenshot.png?raw=true "my-snap-name")
@@ -63,9 +61,7 @@ $ echo $?
 0
 ```
 
-<!-- Uncomment and modify this when your snap is available on the store
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/my-snap-name)
--->
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/klee)
 
 ([Don't have snapd installed?](https://snapcraft.io/docs/core/install))
 
@@ -90,7 +86,7 @@ Snapcrafters ([join us](https://forum.snapcraft.io/t/snapcrafters-reboot/24625))
   - [ ] Fix all important issues found during testing
   - [ ] Make a post in the Snapcraft Forum ["store-requests" category](https://forum.snapcraft.io/c/store-requests/19) asking for a transfer of the snap name from you to Snapcrafters - [link]()
   - [ ] Ask a [Snapcrafters admin](https://github.com/orgs/snapcrafters/people?query=%20role%3Aowner) to fork your repo into github.com/snapcrafters, and configure the repo for automatic publishing into edge on commit
-  - [ ] Add the provided Snapcraft build badge to this `README.md`
+  - [x] Add the provided Snapcraft build badge to this `README.md`
   - [ ] Publish the snap in the Snap store stable channel
   - [ ] Update the install instructions in this `README.md`
   - [ ] Post an announcement in the Snapcraft Forum ["Snapcrafters" category](https://forum.snapcraft.io/c/snapcrafters/23) - [link]()
