@@ -56,19 +56,6 @@ index 558b0010..7eb725d8 100644
                  && not0 != not1
                  )
                {
-diff --git a/include/stp/Simplifier/constantBitP/Dependencies.h b/include/stp/Simplifier/constantBitP/Dependencies.h
-index 74d80c94..be822620 100644
---- a/include/stp/Simplifier/constantBitP/Dependencies.h
-+++ b/include/stp/Simplifier/constantBitP/Dependencies.h
-@@ -77,7 +77,7 @@ private:
-         return; // already been added in.
-     }
- 
--    for (const auto child: current)
-+    for (const auto& child: current)
-     {
-       build(child, current);
-     }
 diff --git a/lib/AbsRefineCounterExample/ArrayTransformer.cpp b/lib/AbsRefineCounterExample/ArrayTransformer.cpp
 index e9e31a93..2e7ea22c 100644
 --- a/lib/AbsRefineCounterExample/ArrayTransformer.cpp
@@ -178,15 +165,6 @@ index 0eccd528..ef7eaa1b 100644
            {
              const bool bit = CONSTANTBV::BitVector_bit_test(interval->maxV, i);
              if (bits->isFixed(i))
-@@ -113,7 +113,7 @@ namespace stp
-                   if (!bit && !reduced)
-                   {
-                      // We are increasing the result. So we need to reduce above.
--                    for (int j = i+1 ; j <= width-1 ; j++)         
-+                    for (unsigned int j = i+1 ; j <= width-1 ; j++)         
-                     {
-                       if (bits->isFixed(j))   
-                         continue;
 diff --git a/lib/Simplifier/PropagateEqualities.cpp b/lib/Simplifier/PropagateEqualities.cpp
 index 62ac0f51..24a60d14 100644
 --- a/lib/Simplifier/PropagateEqualities.cpp
@@ -393,15 +371,6 @@ index d739d252..ffead831 100644
            assert(r);
            doAssign = false;
          }
-@@ -428,7 +428,7 @@ void notHandled(const Kind& k)
- // add to the work list any nodes that take the result of the "n" node.
- void ConstantBitPropagation::scheduleUp(const ASTNode& n)
- {
--  for (const auto it : *dependents->getDependents(n))
-+  for (const auto& it : *dependents->getDependents(n))
-     workList->push(it);
- }
- 
 diff --git a/lib/Simplifier/consteval.cpp b/lib/Simplifier/consteval.cpp
 index 45589cf5..1ebb5a58 100644
 --- a/lib/Simplifier/consteval.cpp
