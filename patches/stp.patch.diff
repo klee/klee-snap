@@ -2,15 +2,6 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 0a56a14d..dcd6959e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -43,7 +43,7 @@ endif()
- project(STP)
- 
- set(CMAKE_C_STANDARD 99)
--set(CMAKE_CXX_STANDARD 14)
-+set(CMAKE_CXX_STANDARD 17)
- 
- include(GenerateExportHeader)
- include(GNUInstallDirs)
 @@ -323,8 +323,6 @@ macro(add_cxx_flag_if_supported flagname)
    endif()
  endmacro()
