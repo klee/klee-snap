@@ -53,10 +53,35 @@ parts:
       craftctl default
       patch -p1 < $SNAPCRAFT_PROJECT_DIR/patches/stp.patch.diff
 
+  klee-uclibc:
+    plugin: nil
+    source-type: git
+    source: https://github.com/klee/klee-uclibc.git
+    override-build: |
+      cp --archive --link --no-dereference --update . "${SNAPCRAFT_PART_INSTALL}/uclibc"
+      (cd "${SNAPCRAFT_PART_INSTALL}/uclibc" &&                                             \
+        ./configure --make-llvm-lib --with-cc clang-13 --with-llvm-config llvm-config-13 && \
+        make -j"${SNAPCRAFT_PARALLEL_BUILD_COUNT}")
+    build-packages:
+      - clang-13
+      - llvm-13
+      - llvm-13-dev
+      - llvm-13-tools
+
+    prime:
+      - -uclibc
+
   klee:
     after:
       - stp
+      - klee-uclibc
     plugin: cmake
+    cmake-parameters:
+      - -DENABLE_POSIX_RUNTIME=ON
+      - -DENABLE_TCMALLOC=ON
+      - -DENABLE_ZLIB=ON
+      - -DKLEE_UCLIBC_PATH="${SNAPCRAFT_STAGE}/uclibc"
+      - -DKLEE_RUNTIME_BUILD_TYPE="Release+Debug"
     source-type: tar
     source: https://github.com/klee/klee/archive/refs/tags/$SNAPCRAFT_PROJECT_VERSION.tar.gz
     override-build: |
@@ -75,6 +100,7 @@ parts:
       - llvm-13-tools
       - libz3-dev # libz3-4
     stage-packages:
+      - libtcmalloc-minimal4
       - libllvm13
       - libz3-4
       - libgoogle-perftools4
