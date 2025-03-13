@@ -33,9 +33,10 @@ parts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DENABLE_ASSERTIONS=OFF
       - -DSTATICCOMPILE=ON
+      - -DNOCRYPTOMINISAT=OFF
     source-type: git
     source: https://github.com/stp/stp
-    source-tag: 2.3.4
+    source-tag: "2.3.4"
     build-packages:
       - bison
       - flex
@@ -60,6 +61,7 @@ parts:
     plugin: nil
     source-type: git
     source: https://github.com/klee/klee-uclibc.git
+    source-tag: klee_uclibc_v1.4
     override-build: |
       cp --archive --link --no-dereference --update . "${SNAPCRAFT_PART_INSTALL}/uclibc"
       (cd "${SNAPCRAFT_PART_INSTALL}/uclibc" &&                                             \
@@ -86,8 +88,9 @@ parts:
       - -DENABLE_ZLIB=ON
       - -DKLEE_UCLIBC_PATH="${SNAPCRAFT_STAGE}/uclibc"
       - -DKLEE_RUNTIME_BUILD_TYPE="Release+Debug"
-    source-type: tar
-    source: https://github.com/klee/klee/archive/refs/tags/$SNAPCRAFT_PROJECT_VERSION.tar.gz
+    source-type: git
+    source: https://github.com/klee/klee.git
+    source-tag: $SNAPCRAFT_PROJECT_VERSION
     override-build: |
       pip3 install lit wllvm
       craftctl default
