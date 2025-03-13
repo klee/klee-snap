@@ -35,6 +35,7 @@ parts:
       - -DSTATICCOMPILE=ON
     source-type: git
     source: https://github.com/stp/stp
+    source-tag: 2.3.4
     build-packages:
       - bison
       - flex
@@ -45,6 +46,8 @@ parts:
       - minisat
       - libcryptominisat5-dev
       - zlib1g-dev
+      - libboost-program-options-dev
+      - libgmp-dev
     prime:
       - -usr/local/bin
       - -usr/local/include

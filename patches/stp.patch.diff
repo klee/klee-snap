@@ -1,26 +1,3 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 0a56a14d..dcd6959e 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -323,8 +323,6 @@ macro(add_cxx_flag_if_supported flagname)
-   endif()
- endmacro()
- 
--check_cxx_compiler_flag("-std=c++11" HAVE_FLAG_STD_CPP11)
--
- if(APPLE)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
- endif()
-@@ -478,7 +476,8 @@ option(NOCRYPTOMINISAT "Don't try to use cryptominisat" OFF)
- 
- if (NOT NOCRYPTOMINISAT)
-   set(cryptominisat5_DIR "" CACHE PATH "Path to directory containing cryptominisat5Config.cmake")
--  find_package(cryptominisat5 CONFIG)
-+  find_package(cryptominisat5 CONFIG)  
-+  check_cxx_compiler_flag("-std=c++11" HAVE_FLAG_STD_CPP11)
-   if (cryptominisat5_FOUND AND HAVE_FLAG_STD_CPP11 AND (NOT NOCRYPTOMINISAT))
-     message(STATUS "CryptoMiniSat5 dynamic lib: ${CRYPTOMINISAT5_LIBRARIES}")
-     message(STATUS "CryptoMiniSat5 static lib:  ${CRYPTOMINISAT5_STATIC_LIBRARIES}")
 diff --git a/include/stp/AST/MutableASTNode.h b/include/stp/AST/MutableASTNode.h
 index 3fe6fa18..631543f7 100644
 --- a/include/stp/AST/MutableASTNode.h
@@ -34,19 +11,6 @@ index 3fe6fa18..631543f7 100644
        for (; it2 != (*it)->children.end(); it2++)
        {
          assert(*it2 != NULL);
-diff --git a/include/stp/Simplifier/MergeSame.h b/include/stp/Simplifier/MergeSame.h
-index 558b0010..7eb725d8 100644
---- a/include/stp/Simplifier/MergeSame.h
-+++ b/include/stp/Simplifier/MergeSame.h
-@@ -156,7 +156,7 @@ public:
-                 && conjuncts[i0].Degree() == 2 
-                 && conjuncts[i0][0] == not0
-                 && conjuncts[i0][1] == not1
--                && i0 != i
-+                && i0 != (int)i
-                 && not0 != not1
-                 )
-               {
 diff --git a/lib/AbsRefineCounterExample/ArrayTransformer.cpp b/lib/AbsRefineCounterExample/ArrayTransformer.cpp
 index e9e31a93..2e7ea22c 100644
 --- a/lib/AbsRefineCounterExample/ArrayTransformer.cpp
